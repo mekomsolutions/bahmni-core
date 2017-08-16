@@ -1,18 +1,19 @@
 package org.bahmni.module.bahmnicore.contract.patient.search;
 
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
 import org.bahmni.module.bahmnicore.contract.patient.response.PatientResponse;
 import org.bahmni.module.bahmnicore.customdatatype.datatype.CodedConceptDatatype;
+import org.bahmni.module.bahmnicore.i18n.Internationalizer;
 import org.bahmni.module.bahmnicore.model.bahmniPatientProgram.ProgramAttributeType;
 import org.hibernate.SQLQuery;
 import org.hibernate.SessionFactory;
 import org.hibernate.transform.Transformers;
 import org.hibernate.type.StandardBasicTypes;
 import org.hibernate.type.Type;
-
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 
 public class PatientSearchBuilder {
 
@@ -84,15 +85,15 @@ public class PatientSearchBuilder {
 		return this;
 	}
 
-	public PatientSearchBuilder withPatientAddress(String addressFieldName, String addressFieldValue, String[] addressAttributeFields){
-		PatientAddressFieldQueryHelper patientAddressQueryHelper = new PatientAddressFieldQueryHelper(addressFieldName,addressFieldValue, addressAttributeFields);
+	public PatientSearchBuilder withPatientAddress(String addressFieldName, String addressFieldValue, String[] addressAttributeFields, Internationalizer i18n) {
+		PatientAddressFieldQueryHelper patientAddressQueryHelper = new PatientAddressFieldQueryHelper(addressFieldName,addressFieldValue, addressAttributeFields, i18n);
 		where = patientAddressQueryHelper.appendToWhereClause(where);
 		select = patientAddressQueryHelper.selectClause(select);
 		groupBy = patientAddressQueryHelper.appendToGroupByClause(groupBy);
 		types.putAll(patientAddressQueryHelper.addScalarQueryResult());
 		return this;
 	}
-
+	
 	public PatientSearchBuilder withPatientIdentifier(String identifier, Boolean filterOnAllIdentifiers){
 		PatientIdentifierQueryHelper patientIdentifierQueryHelper = new PatientIdentifierQueryHelper(identifier, filterOnAllIdentifiers);
 		join = patientIdentifierQueryHelper.appendToJoinClause(join);

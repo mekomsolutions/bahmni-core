@@ -66,7 +66,7 @@ public class PatientDaoImpl implements PatientDao {
 
         SQLQuery sqlQuery = new PatientSearchBuilder(sessionFactory)
                 .withPatientName(name)
-                .withPatientAddress(addressFieldName, addressFieldValue, addressSearchResultFields)
+                .withPatientAddress(addressFieldName, addressFieldValue, addressSearchResultFields, i18n)
                 .withPatientIdentifier(identifier, filterOnAllIdentifiers)
                 .withPatientAttributes(customAttribute, getPersonAttributeIds(customAttributeFields), getPersonAttributeIds(patientSearchResultFields))
                 .withProgramAttributes(programAttributeFieldValue, programAttributeType)
@@ -157,8 +157,7 @@ public class PatientDaoImpl implements PatientDao {
         String identifierTypes = Context.getAdministrationService().getGlobalProperty(identifierProperty);
         if(StringUtils.isNotEmpty(identifierTypes)) {
             String[] identifierUuids = identifierTypes.split(",");
-            for (String identifierUuid :
-                    identifierUuids) {
+            for (String identifierUuid : identifierUuids) {
                 PatientIdentifierType patientIdentifierType = Context.getPatientService().getPatientIdentifierTypeByUuid(identifierUuid);
                 if (patientIdentifierType != null) {
                     identifierTypeNames.add(i18n.getMessageKey(patientIdentifierType.getName()));

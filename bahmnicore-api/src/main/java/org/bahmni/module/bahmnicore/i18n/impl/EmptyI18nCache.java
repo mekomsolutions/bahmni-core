@@ -1,10 +1,14 @@
 package org.bahmni.module.bahmnicore.i18n.impl;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.Locale;
 
-import org.openmrs.module.exti18n.api.ReverseI18nCache;
+import org.openmrs.PersonAddress;
+import org.openmrs.module.exti18n.api.AddressHierarchyI18nCache;
 
-public class EmptyI18nCache implements ReverseI18nCache {
+public class EmptyI18nCache implements AddressHierarchyI18nCache {
 
 	@Override
 	public void reset() {
@@ -32,5 +36,24 @@ public class EmptyI18nCache implements ReverseI18nCache {
 	@Override
 	public String getMessageKey(String message) {
 		return message;
+	}
+
+	@Override
+	public List<String> getOrderedAddressFields() {
+		return Collections.<String>emptyList();
+	}
+
+	@Override
+	public void setOrderedAddressFields(List<String> orderedAddressFields) {
+	}
+
+	@Override
+	public List<String> getMessageKeysByLikeName(String searchString) {
+		return Arrays.asList(searchString);
+	}
+
+	@Override
+	public PersonAddress getI18nPersonAddress(PersonAddress address) {
+		return address;
 	}
 }
