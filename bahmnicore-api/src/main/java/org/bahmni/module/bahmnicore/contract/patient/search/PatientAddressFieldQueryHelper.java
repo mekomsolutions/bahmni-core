@@ -12,10 +12,10 @@ import java.util.stream.Collectors;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.StringUtils;
-import org.bahmni.module.bahmnicore.i18n.Internationalizer;
-import org.bahmni.module.bahmnicore.i18n.impl.InternationalizerImpl;
 import org.hibernate.type.StandardBasicTypes;
 import org.hibernate.type.Type;
+import org.openmrs.module.bahmnicore.i18n.Internationalizer;
+import org.openmrs.module.bahmnicore.i18n.impl.DisabledInternationalizer;
 
 public class PatientAddressFieldQueryHelper {
 	private String addressFieldValue;
@@ -33,7 +33,7 @@ public class PatientAddressFieldQueryHelper {
 	}
 
 	public PatientAddressFieldQueryHelper(String addressFieldName,String addressFieldValue, String[] addressResultFields) {
-		this(addressFieldName, addressFieldValue, addressResultFields, new InternationalizerImpl());
+		this(addressFieldName, addressFieldValue, addressResultFields, new DisabledInternationalizer());
 	}
 
 	public String selectClause(String select){

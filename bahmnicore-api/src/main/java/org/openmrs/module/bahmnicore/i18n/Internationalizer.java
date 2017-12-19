@@ -1,7 +1,13 @@
-package org.bahmni.module.bahmnicore.i18n;
+package org.openmrs.module.bahmnicore.i18n;
 
 import java.util.List;
 
+/**
+ * Internationalizer helps leverage and does provide an API to the internationalization caches of Ext I18N.
+ * It is placed (as well as its implementations) in an org.openmrs.* package to be scannable according to
+ * OpenMRS Core annotation filters.
+ * See https://github.com/openmrs/openmrs-core/blob/eeccac7ae121271ddbeda83e6465d9c5da7e65c0/api/src/main/resources/applicationContext-service.xml#L679
+ */
 public interface Internationalizer {
 
 	/**

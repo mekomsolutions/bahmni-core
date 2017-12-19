@@ -1,32 +1,29 @@
-package org.bahmni.module.bahmnicore.i18n.impl;
+package org.openmrs.module.bahmnicore.i18n.impl;
 
 import java.util.List;
 
-import org.bahmni.module.bahmnicore.i18n.Internationalizer;
-import org.openmrs.api.context.Context;
-import org.openmrs.module.ModuleFactory;
+import org.openmrs.annotation.OpenmrsProfile;
+import org.openmrs.module.bahmnicore.i18n.Internationalizer;
 import org.openmrs.module.exti18n.ExtI18nConstants;
 import org.openmrs.module.exti18n.api.AddressHierarchyI18nCache;
 import org.openmrs.module.exti18n.api.ReverseI18nCache;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 
+@OpenmrsProfile(modules = {"exti18n:*"})
 public class InternationalizerImpl implements Internationalizer {
 
-	private AddressHierarchyI18nCache ahCache = new EmptyI18nCache();
+	@Autowired
+	@Qualifier(ExtI18nConstants.COMPONENT_AH_REVI18N)
+	private AddressHierarchyI18nCache ahCache;
+	
+	@Autowired
+	@Qualifier(ExtI18nConstants.COMPONENT_REVI18N)
 	private ReverseI18nCache cache = ahCache;
 	
 	@Override
 	public boolean isEnabled() {
 		return cache.isEnabled() || ahCache.isEnabled();
-	}
-	
-	/*
-	 * Spring initializer
-	 */
-	public void init() {
-		if (ModuleFactory.isModuleStarted("exti18n")) {
-			cache = Context.getRegisteredComponent(ExtI18nConstants.COMPONENT_REVI18N, ReverseI18nCache.class);
-			ahCache = Context.getRegisteredComponent(ExtI18nConstants.COMPONENT_AH_REVI18N, AddressHierarchyI18nCache.class);
-		}
 	}
 	
 	@Override

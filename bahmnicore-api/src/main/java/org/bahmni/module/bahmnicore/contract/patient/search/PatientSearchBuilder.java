@@ -7,13 +7,13 @@ import java.util.Map;
 
 import org.bahmni.module.bahmnicore.contract.patient.response.PatientResponse;
 import org.bahmni.module.bahmnicore.customdatatype.datatype.CodedConceptDatatype;
-import org.bahmni.module.bahmnicore.i18n.Internationalizer;
 import org.bahmni.module.bahmnicore.model.bahmniPatientProgram.ProgramAttributeType;
 import org.hibernate.SQLQuery;
 import org.hibernate.SessionFactory;
 import org.hibernate.transform.Transformers;
 import org.hibernate.type.StandardBasicTypes;
 import org.hibernate.type.Type;
+import org.openmrs.module.bahmnicore.i18n.Internationalizer;
 
 public class PatientSearchBuilder {
 

@@ -17,7 +17,6 @@ import org.bahmni.module.bahmnicore.contract.patient.mapper.PatientResponseMappe
 import org.bahmni.module.bahmnicore.contract.patient.response.PatientResponse;
 import org.bahmni.module.bahmnicore.contract.patient.search.PatientSearchBuilder;
 import org.bahmni.module.bahmnicore.dao.PatientDao;
-import org.bahmni.module.bahmnicore.i18n.Internationalizer;
 import org.bahmni.module.bahmnicore.model.bahmniPatientProgram.ProgramAttributeType;
 import org.bahmni.module.bahmnicore.service.BahmniProgramWorkflowService;
 import org.hibernate.Query;
@@ -35,6 +34,7 @@ import org.openmrs.PatientIdentifier;
 import org.openmrs.PatientIdentifierType;
 import org.openmrs.RelationshipType;
 import org.openmrs.api.context.Context;
+import org.openmrs.module.bahmnicore.i18n.Internationalizer;
 import org.openmrs.module.bahmniemrapi.visitlocation.BahmniVisitLocationServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;

@@ -5,16 +5,15 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 
-import org.bahmni.module.bahmnicore.i18n.Internationalizer;
 import org.hibernate.type.StandardBasicTypes;
 import org.hibernate.type.Type;
 import org.junit.Assert;
 import org.junit.Test;
+import org.openmrs.module.bahmnicore.i18n.Internationalizer;
 
 public class PatientAddressFieldQueryHelperTest {
 

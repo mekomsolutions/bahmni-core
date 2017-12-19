@@ -270,7 +270,7 @@
           <groupId>org.openmrs.module</groupId>
           <artifactId>exti18n-api</artifactId>
           <version>${exti18nVersion}</version>
-          <scope>provided</scope>
+          <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>junit</groupId>

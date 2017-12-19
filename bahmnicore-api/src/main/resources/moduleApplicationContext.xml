@@ -156,5 +156,4 @@
         </property>
     </bean>
 
-    <bean id="bahmniInternationalizer" class="org.bahmni.module.bahmnicore.i18n.impl.InternationalizerImpl" init-method="init"/>
 </beans>
