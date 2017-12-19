@@ -1,9 +1,9 @@
-package org.openmrs.module.bahmnicore.i18n.impl;
+package org.bahmni.module.bahmnicore.i18n.impl;
 
 import java.util.List;
 
+import org.bahmni.module.bahmnicore.i18n.Internationalizer;
 import org.openmrs.annotation.OpenmrsProfile;
-import org.openmrs.module.bahmnicore.i18n.Internationalizer;
 import org.openmrs.module.exti18n.ExtI18nConstants;
 import org.openmrs.module.exti18n.api.AddressHierarchyI18nCache;
 import org.openmrs.module.exti18n.api.ReverseI18nCache;

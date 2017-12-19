@@ -1,10 +1,10 @@
-package org.openmrs.module.bahmnicore.i18n.impl;
+package org.bahmni.module.bahmnicore.i18n.impl;
 
 import java.util.Collections;
 import java.util.List;
 
+import org.bahmni.module.bahmnicore.i18n.Internationalizer;
 import org.openmrs.annotation.OpenmrsProfile;
-import org.openmrs.module.bahmnicore.i18n.Internationalizer;
 
 @OpenmrsProfile(modules = {"!exti18n"})
 public class DisabledInternationalizer implements Internationalizer {
