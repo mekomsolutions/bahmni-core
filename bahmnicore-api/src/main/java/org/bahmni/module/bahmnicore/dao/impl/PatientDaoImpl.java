@@ -4,12 +4,14 @@ import static java.util.stream.Collectors.toList;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.lucene.search.Sort;
 import org.apache.lucene.search.SortField;
@@ -63,15 +65,27 @@ public class PatientDaoImpl implements PatientDao {
         validateSearchParams(customAttributeFields, programAttributeFieldName, addressFieldName);
 
         ProgramAttributeType programAttributeType = getProgramAttributeType(programAttributeFieldName);
-
-        SQLQuery sqlQuery = new PatientSearchBuilder(sessionFactory)
+        
+        PatientSearchBuilder builder = new PatientSearchBuilder(sessionFactory)
                 .withPatientName(name)
-                .withPatientAddress(addressFieldName, addressFieldValue, addressSearchResultFields, i18n)
                 .withPatientIdentifier(identifier, filterOnAllIdentifiers)
                 .withPatientAttributes(customAttribute, getPersonAttributeIds(customAttributeFields), getPersonAttributeIds(patientSearchResultFields))
                 .withProgramAttributes(programAttributeFieldValue, programAttributeType)
-                .withLocation(loginLocationUuid, filterPatientsByLocation)
-                .buildSqlQuery(length, offset);
+                .withLocation(loginLocationUuid, filterPatientsByLocation);
+        
+        if (!i18n.isEnabled()) {
+        	builder.withPatientAddress(addressFieldName, addressFieldValue, addressSearchResultFields);
+        }
+        else { // when i18n is enabled the address is in a list of matched address i18n codes, if any
+        	List<String> codedAddressFieldValues = i18n.getAddressMessageKeysByLikeName(addressFieldValue);
+        	if (CollectionUtils.isEmpty(codedAddressFieldValues)) {
+        		// if no codes could be found then no patients are matched
+        		return Collections.emptyList();
+        	}
+        	builder.withPatientAddressInList(addressFieldName, codedAddressFieldValues, addressSearchResultFields);
+        }
+        
+        SQLQuery sqlQuery = builder.buildSqlQuery(length, offset);
         return sqlQuery.list();
     }
 
@@ -153,7 +167,7 @@ public class PatientDaoImpl implements PatientDao {
         return identifierTypeNames;
     }
 
-    private void addIdentifierTypeName(List<String> identifierTypeNames,String identifierProperty) {
+    private void addIdentifierTypeName(List<String> identifierTypeNames, String identifierProperty) {
         String identifierTypes = Context.getAdministrationService().getGlobalProperty(identifierProperty);
         if(StringUtils.isNotEmpty(identifierTypes)) {
             String[] identifierUuids = identifierTypes.split(",");

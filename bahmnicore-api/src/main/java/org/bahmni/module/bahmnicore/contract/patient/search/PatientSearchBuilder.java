@@ -7,7 +7,6 @@ import java.util.Map;
 
 import org.bahmni.module.bahmnicore.contract.patient.response.PatientResponse;
 import org.bahmni.module.bahmnicore.customdatatype.datatype.CodedConceptDatatype;
-import org.bahmni.module.bahmnicore.i18n.Internationalizer;
 import org.bahmni.module.bahmnicore.model.bahmniPatientProgram.ProgramAttributeType;
 import org.hibernate.SQLQuery;
 import org.hibernate.SessionFactory;
@@ -85,8 +84,23 @@ public class PatientSearchBuilder {
 		return this;
 	}
 
-	public PatientSearchBuilder withPatientAddress(String addressFieldName, String addressFieldValue, String[] addressAttributeFields, Internationalizer i18n) {
-		PatientAddressFieldQueryHelper patientAddressQueryHelper = new PatientAddressFieldQueryHelper(addressFieldName,addressFieldValue, addressAttributeFields, i18n);
+	/**
+	 * Searches for patients with the address field LIKE the value provided.
+	 */
+	public PatientSearchBuilder withPatientAddress(String addressFieldName, String addressFieldValue, String[] addressAttributeFields) {
+		PatientAddressFieldQueryHelper patientAddressQueryHelper = new PatientAddressFieldQueryHelper(addressFieldName, addressFieldValue, addressAttributeFields);
+		where = patientAddressQueryHelper.appendToWhereClause(where);
+		select = patientAddressQueryHelper.selectClause(select);
+		groupBy = patientAddressQueryHelper.appendToGroupByClause(groupBy);
+		types.putAll(patientAddressQueryHelper.addScalarQueryResult());
+		return this;
+	}
+	
+	/**
+	 * Searches for patients with the address field IN the list of values provided.
+	 */
+	public PatientSearchBuilder withPatientAddressInList(String addressFieldName, List<String> addressFieldValues, String[] addressAttributeFields) {
+		PatientAddressFieldQueryHelper patientAddressQueryHelper = new PatientAddressFieldInListQueryHelper(addressFieldName, addressFieldValues, addressAttributeFields);
 		where = patientAddressQueryHelper.appendToWhereClause(where);
 		select = patientAddressQueryHelper.selectClause(select);
 		groupBy = patientAddressQueryHelper.appendToGroupByClause(groupBy);
