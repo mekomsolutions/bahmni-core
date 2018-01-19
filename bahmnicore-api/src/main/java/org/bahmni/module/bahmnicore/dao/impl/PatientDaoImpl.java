@@ -73,16 +73,16 @@ public class PatientDaoImpl implements PatientDao {
                 .withProgramAttributes(programAttributeFieldValue, programAttributeType)
                 .withLocation(loginLocationUuid, filterPatientsByLocation);
         
-        if (!i18n.isEnabled()) {
-        	builder.withPatientAddress(addressFieldName, addressFieldValue, addressSearchResultFields);
+        if (!i18n.isEnabled() || StringUtils.isEmpty(addressFieldValue)) {
+            builder.withPatientAddress(addressFieldName, addressFieldValue, addressSearchResultFields);
         }
         else { // when i18n is enabled the address is in a list of matched address i18n codes, if any
-        	List<String> codedAddressFieldValues = i18n.getAddressMessageKeysByLikeName(addressFieldValue);
-        	if (CollectionUtils.isEmpty(codedAddressFieldValues)) {
-        		// if no codes could be found then no patients are matched
-        		return Collections.emptyList();
-        	}
-        	builder.withPatientAddressInList(addressFieldName, codedAddressFieldValues, addressSearchResultFields);
+            List<String> codedAddressFieldValues = i18n.getAddressMessageKeysByLikeName(addressFieldValue);
+            if (CollectionUtils.isEmpty(codedAddressFieldValues)) {
+                // if no codes could be found then no patients are matched
+                return Collections.emptyList();
+            }
+            builder.withPatientAddressInList(addressFieldName, codedAddressFieldValues, addressSearchResultFields);
         }
         
         SQLQuery sqlQuery = builder.buildSqlQuery(length, offset);
