@@ -6,6 +6,7 @@ import org.openmrs.ConceptAnswer;
 import org.openmrs.api.context.Context;
 import org.openmrs.customdatatype.InvalidCustomValueException;
 import org.openmrs.customdatatype.SerializingCustomDatatype;
+import org.openmrs.util.PrivilegeConstants;
 
 import java.util.Collection;
 import java.util.List;
@@ -18,9 +19,11 @@ public class CodedConceptDatatype extends SerializingCustomDatatype<Concept> {
         if (MiscUtils.onlyDigits(id)) {
             this.codedConcept = Context.getConceptService().getConcept(Integer.valueOf(id));
         } else {
+            Context.addProxyPrivilege(PrivilegeConstants.SQL_LEVEL_ACCESS);
             List<List<Object>> conceptId = Context.getAdministrationService()
                     .executeSQL("select concept_id from concept where uuid='" + id + "';", true);
             this.codedConcept = Context.getConceptService().getConcept(conceptId.get(0).get(0).toString());
+            Context.removeProxyPrivilege(PrivilegeConstants.SQL_LEVEL_ACCESS);
         }
     }
 
