@@ -341,7 +341,7 @@ public class ObsDaoImpl implements ObsDao {
     @Override
     public List<Obs> getObsByPatientProgramUuidAndConceptNames(String patientProgramUuid, List<String> conceptNames, Integer limit, OrderBy sortOrder, Date startDate, Date endDate) {
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        StringBuilder queryString = new StringBuilder("SELECT o.* " +
+        StringBuilder queryString = new StringBuilder("SELECT DISTINCT o.* " +
                 "FROM patient_program pp " +
                 "INNER JOIN episode_patient_program epp " +
                 "ON pp.patient_program_id = epp.patient_program_id\n " +
