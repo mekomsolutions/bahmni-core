@@ -22,6 +22,14 @@ public interface Internationalizer {
 	public String getMessageKey(String msg);
 
 	/**
+	 * Returns the internationalized message from a key.
+	 * Eg. "addresshierarchy.cambodia" -> "កម្ពុជា". 
+	 * @param The i18n message key.
+	 * @return A localized string.
+	 */
+	public String getMessage(String key);
+
+	/**
 	 * Returns the list of possible address hierarchy entries message keys
 	 * when given a partial string out of the localized address entry.
 	 * @param addressSearchString

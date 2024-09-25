@@ -32,6 +32,11 @@ public class InternationalizerImpl implements Internationalizer {
 	}
 
 	@Override
+	public String getMessage(String key) {
+		return cache.getMessage(ahCache.getMessage(key));
+	}
+
+	@Override
 	public List<String> getAddressMessageKeysByLikeName(String addressSearchString) {
 		return ahCache.getMessageKeysByLikeName(addressSearchString);
 	}

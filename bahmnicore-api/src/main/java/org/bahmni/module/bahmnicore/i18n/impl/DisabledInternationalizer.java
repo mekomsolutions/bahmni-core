@@ -20,6 +20,11 @@ public class DisabledInternationalizer implements Internationalizer {
 	}
 
 	@Override
+	public String getMessage(String key) {
+		return key;
+	}
+
+	@Override
 	public List<String> getAddressMessageKeysByLikeName(String addressSearchString) {
 		return Collections.emptyList();
 	}
