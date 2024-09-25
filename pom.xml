@@ -43,6 +43,7 @@
         <bacteriology.version>1.2.0</bacteriology.version>
         <forkedRulesengineVersion>0.92-1.0.0</forkedRulesengineVersion>
         <forkedBahmniJavaUtilsVersion>0.94-1.0.0</forkedBahmniJavaUtilsVersion>
+        <exti18nVersion>1.0.0</exti18nVersion>
         <!--test dependencies-->
 
         <junitVersion>4.12</junitVersion>
