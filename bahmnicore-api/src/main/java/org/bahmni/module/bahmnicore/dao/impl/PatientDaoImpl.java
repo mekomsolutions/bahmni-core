@@ -1,5 +1,19 @@
 package org.bahmni.module.bahmnicore.dao.impl;
 
+import static java.util.stream.Collectors.toList;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.lucene.search.Sort;
 import org.apache.lucene.search.SortField;
@@ -7,8 +21,13 @@ import org.bahmni.module.bahmnicore.contract.patient.mapper.PatientResponseMappe
 import org.bahmni.module.bahmnicore.contract.patient.response.PatientResponse;
 import org.bahmni.module.bahmnicore.contract.patient.search.PatientSearchBuilder;
 import org.bahmni.module.bahmnicore.dao.PatientDao;
+import org.bahmni.module.bahmnicore.i18n.Internationalizer;
 import org.bahmni.module.bahmnicore.model.bahmniPatientProgram.ProgramAttributeType;
 import org.bahmni.module.bahmnicore.service.BahmniProgramWorkflowService;
+import org.codehaus.jackson.JsonParseException;
+import org.codehaus.jackson.map.JsonMappingException;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.type.TypeReference;
 import org.hibernate.Query;
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
@@ -28,25 +47,21 @@ import org.openmrs.module.bahmniemrapi.visitlocation.BahmniVisitLocationServiceI
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-
-import static java.util.stream.Collectors.toList;
-
 @Repository
 public class PatientDaoImpl implements PatientDao {
 
     public static final int MAX_NGRAM_SIZE = 20;
+    
+    private enum PropertyType { KEYS, VALUES};
+    
     private SessionFactory sessionFactory;
+    
+    private Internationalizer i18n;
 
     @Autowired
-    public PatientDaoImpl(SessionFactory sessionFactory) {
+    public PatientDaoImpl(SessionFactory sessionFactory, Internationalizer i18n) {
         this.sessionFactory = sessionFactory;
+        this.i18n = i18n;
     }
 
     @Override
@@ -59,16 +74,52 @@ public class PatientDaoImpl implements PatientDao {
         validateSearchParams(customAttributeFields, programAttributeFieldName, addressFieldName);
 
         ProgramAttributeType programAttributeType = getProgramAttributeType(programAttributeFieldName);
-
-        SQLQuery sqlQuery = new PatientSearchBuilder(sessionFactory)
+        
+        PatientSearchBuilder builder = new PatientSearchBuilder(sessionFactory)
                 .withPatientName(name)
-                .withPatientAddress(addressFieldName, addressFieldValue, addressSearchResultFields)
                 .withPatientIdentifier(identifier, filterOnAllIdentifiers)
                 .withPatientAttributes(customAttribute, getPersonAttributeIds(customAttributeFields), getPersonAttributeIds(patientSearchResultFields))
                 .withProgramAttributes(programAttributeFieldValue, programAttributeType)
-                .withLocation(loginLocationUuid, filterPatientsByLocation)
-                .buildSqlQuery(length, offset);
-        return sqlQuery.list();
+                .withLocation(loginLocationUuid, filterPatientsByLocation);
+        
+        if (!i18n.isEnabled() || StringUtils.isEmpty(addressFieldValue)) {
+            builder.withPatientAddress(addressFieldName, addressFieldValue, addressSearchResultFields);
+        }
+        else { // when i18n is enabled the address is in a list of matched address i18n codes, if any
+            List<String> codedAddressFieldValues = i18n.getAddressMessageKeysByLikeName(addressFieldValue);
+            if (CollectionUtils.isEmpty(codedAddressFieldValues)) {
+                // if no codes could be found then no patients are matched
+                return Collections.emptyList();
+            }
+            builder.withPatientAddressInList(addressFieldName, codedAddressFieldValues, addressSearchResultFields);
+        }
+        
+        SQLQuery sqlQuery = builder.buildSqlQuery(length, offset);
+        List<PatientResponse> responses = sqlQuery.list();
+        if (i18n.isEnabled() ) {
+        	responses.stream().forEach(response -> {
+            	try {
+    				response.setExtraIdentifiers(localize(response.getExtraIdentifiers(), PropertyType.KEYS));
+    				response.setAddressFieldValue(localize(response.getAddressFieldValue(), PropertyType.VALUES));
+                } catch (Exception e) {}
+            });
+        }
+        return responses;
+    }
+    
+    private String localize(String extraIdentifiers, PropertyType propType) throws Exception {
+        ObjectMapper mapper = new ObjectMapper();
+        Map<String, String> originalMap = mapper.readValue(extraIdentifiers, new TypeReference<Map<String, String>>() {});
+        Map<String, String> modifiedMap = new HashMap<>();
+
+        for (Map.Entry<String, String> entry : originalMap.entrySet()) {
+        	if (PropertyType.KEYS.compareTo(propType) == 0) {
+        		modifiedMap.put(i18n.getMessage(entry.getKey()), entry.getValue());
+        	} else {
+        		modifiedMap.put(entry.getKey(), i18n.getMessage(entry.getValue()));
+        	}
+        }
+        return mapper.writeValueAsString(modifiedMap);
     }
 
     @Override
@@ -84,7 +135,7 @@ public class PatientDaoImpl implements PatientDao {
         List<PatientIdentifier> patientIdentifiers = getPatientIdentifiers(identifier, filterOnAllIdentifiers, offset, length);
         List<Integer> patientIds = patientIdentifiers.stream().map(patientIdentifier -> patientIdentifier.getPatient().getPatientId()).collect(toList());
         Map<Object, Object> programAttributes = Context.getService(BahmniProgramWorkflowService.class).getPatientProgramAttributeByAttributeName(patientIds, programAttributeFieldName);
-        PatientResponseMapper patientResponseMapper = new PatientResponseMapper(Context.getVisitService(),new BahmniVisitLocationServiceImpl(Context.getLocationService()));
+        PatientResponseMapper patientResponseMapper = new PatientResponseMapper(Context.getVisitService(), new BahmniVisitLocationServiceImpl(Context.getLocationService()), i18n);
         Set<Integer> uniquePatientIds = new HashSet<>();
         List<PatientResponse> patientResponses = patientIdentifiers.stream()
                 .map(patientIdentifier -> {
@@ -149,15 +200,14 @@ public class PatientDaoImpl implements PatientDao {
         return identifierTypeNames;
     }
 
-    private void addIdentifierTypeName(List<String> identifierTypeNames,String identifierProperty) {
+    private void addIdentifierTypeName(List<String> identifierTypeNames, String identifierProperty) {
         String identifierTypes = Context.getAdministrationService().getGlobalProperty(identifierProperty);
         if(StringUtils.isNotEmpty(identifierTypes)) {
             String[] identifierUuids = identifierTypes.split(",");
-            for (String identifierUuid :
-                    identifierUuids) {
+            for (String identifierUuid : identifierUuids) {
                 PatientIdentifierType patientIdentifierType = Context.getPatientService().getPatientIdentifierTypeByUuid(identifierUuid);
                 if (patientIdentifierType != null) {
-                    identifierTypeNames.add(patientIdentifierType.getName());
+                    identifierTypeNames.add(i18n.getMessageKey(patientIdentifierType.getName()));
                 }
             }
         }
@@ -248,5 +298,6 @@ public class PatientDaoImpl implements PatientDao {
                         " where rt.aIsToB = :aIsToB ");
         querytoGetPatients.setString("aIsToB", aIsToB);
         return querytoGetPatients.list();
-    }
+    }    
+    
 }

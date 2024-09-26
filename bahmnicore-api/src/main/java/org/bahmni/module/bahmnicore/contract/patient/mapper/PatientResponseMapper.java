@@ -4,6 +4,8 @@ import java.util.Objects;
 import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.bahmni.module.bahmnicore.contract.patient.response.PatientResponse;
+import org.bahmni.module.bahmnicore.i18n.impl.DisabledInternationalizer;
+import org.bahmni.module.bahmnicore.i18n.Internationalizer;
 import org.openmrs.Patient;
 import org.openmrs.PatientIdentifier;
 import org.openmrs.PersonAddress;
@@ -30,11 +32,23 @@ public class PatientResponseMapper {
     private PatientResponse patientResponse;
     private VisitService visitService;
     private BahmniVisitLocationServiceImpl bahmniVisitLocationService;
+    private Internationalizer i18n;
 
 
     public PatientResponseMapper(VisitService visitService, BahmniVisitLocationServiceImpl bahmniVisitLocationService) {
         this.visitService = visitService;
         this.bahmniVisitLocationService = bahmniVisitLocationService;
+        this.i18n = new DisabledInternationalizer();
+    }
+
+    public PatientResponseMapper(VisitService visitService, BahmniVisitLocationServiceImpl bahmniVisitLocationService, Internationalizer i18n) {
+        this.visitService = visitService;
+        this.bahmniVisitLocationService = bahmniVisitLocationService;
+        if (i18n == null){
+            this.i18n = new DisabledInternationalizer();
+        } else {
+            this.i18n = i18n;
+        }
     }
 
     public PatientResponse map(Patient patient, String loginLocationUuid, String[] searchResultFields, String[] addressResultFields, Object programAttributeValue) {
@@ -74,7 +88,7 @@ public class PatientResponseMapper {
                 .map(patientIdentifier -> {
                     String identifier = patientIdentifier.getIdentifier();
                     return identifier == null ? ""
-                                              : formKeyPair(patientIdentifier.getIdentifierType().getName(), identifier);
+                                              : formKeyPair((i18n.isEnabled() ? i18n.getMessage(patientIdentifier.getIdentifierType().getName()) : patientIdentifier.getIdentifierType().getName()), identifier);
                 })
                 .collect(Collectors.joining(","));
         patientResponse.setExtraIdentifiers(formJsonString(extraIdentifiers));
@@ -105,7 +119,7 @@ public class PatientResponseMapper {
         String queriedAddressFields = addressSearchResultFields.stream()
                 .map(addressField -> {
                     String address = getPersonAddressFieldValue(addressField, patient.getPersonAddress());
-                    return address == null ? null : formKeyPair(addressField, address);
+                    return address == null ? null : formKeyPair(addressField, (i18n.isEnabled() ? i18n.getMessage(address) : address));
                 })
                 .filter(Objects::nonNull)
                 .collect(Collectors.joining(","));
